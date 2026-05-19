@@ -1,0 +1,146 @@
+/**
+ * @license
+ * MIT License
+ * 
+ * Copyright (c) 2026 Christian Mollo <gnuchrismo@gmail.com>
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * Author: Christian Mollo
+ * Email: gnuchrismo@gmail.com
+ */
+/* ═══════════════════════════════════════════════════
+   GLOBALS — Banco Fortaleza Design System v4.0
+   Paleta extraída de bancofortaleza.com.bo
+   ═══════════════════════════════════════════════════ */
+
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+/* ── CSS Tokens ── */
+:root {
+  /* Brand */
+  --brand-navy:    #1C3B6E;
+  --brand-orange:  #F5A623;
+  --brand-orange-h:#E08E0B;   /* hover */
+  --brand-orange-l:#FEF3DC;   /* light tint */
+
+  /* Neutrals */
+  --bg:            #F4F5F7;
+  --surface:       #FFFFFF;
+  --surface-alt:   #F9FAFB;
+  --border:        #E2E6ED;
+  --text-primary:  #1A1A2E;
+  --text-secondary:#6B7080;
+  --text-muted:    #9CA3AF;
+
+  /* Semantic */
+  --ok:            #F5A623;
+  --ok-light:      #FEF3DC;
+  --error:         #E53E3E;
+  --error-light:   #FFF5F5;
+  --warn:          #F59E0B;
+  --warn-light:    #FFFBEB;
+
+  /* Radii & shadows */
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:  0 4px 16px rgba(28,59,110,0.10);
+  --shadow-lg:  0 12px 40px rgba(28,59,110,0.14);
+
+  /* Accesibilidad */
+  --focus-ring: 0 0 0 3px rgba(245,166,35,0.50);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  font-family: 'Inter', 'Outfit', sans-serif;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Accesibilidad: focus visible ──────────────────── */
+:focus-visible {
+  outline: 2px solid var(--brand-orange);
+  outline-offset: 2px;
+  box-shadow: var(--focus-ring);
+}
+
+/* Ocultar outline solo cuando no se usa teclado */
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── Accesibilidad: skip-to-main link ─────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--brand-navy);
+  color: #fff;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+.skip-link:focus { top: 0; }
+
+/* ── Accesibilidad: screen reader only ────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Reducción de movimiento (WCAG 2.1 §2.3.3) ─────── */
+/* Desactiva animaciones decorativas para usuarios con
+   vestibular disorders o sensibilidad al movimiento.   */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+    scroll-behavior:           auto   !important;
+  }
+}
+
+/* ── Alto contraste (Windows/GNOME forced-colors) ──── */
+@media (forced-colors: active) {
+  :root {
+    --brand-navy:   ButtonText;
+    --brand-orange: Highlight;
+    --border:       ButtonBorder;
+  }
+}

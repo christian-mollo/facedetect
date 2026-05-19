@@ -1,0 +1,153 @@
+/**
+ * @license
+ * MIT License
+ * 
+ * Copyright (c) 2026 Christian Mollo <gnuchrismo@gmail.com>
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * Author: Christian Mollo
+ * Email: gnuchrismo@gmail.com
+ */
+/* ══════════════════════════════════════════════════
+   APP SHELL — Banco Fortaleza layout
+   ══════════════════════════════════════════════════ */
+
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg);
+}
+
+/* ── Top nav bar (mimics Banco Fortaleza header) ─── */
+.app-header {
+  width: 100%;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Logo icon placeholder → orange rounded square */
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--brand-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand-text .banco {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--brand-navy);
+  text-transform: uppercase;
+}
+
+.brand-text .fortaleza {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--brand-orange);
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Step indicator (like the dots in the screenshot) */
+.step-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s;
+}
+
+.dot.active {
+  width: 20px;
+  border-radius: 4px;
+  background: var(--brand-navy);
+}
+
+/* ── Page title block ─────────────────────────────── */
+.page-title-block {
+  padding: 20px 24px 4px;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+
+.page-title-block h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1rem, 4vw, 1.2rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.page-title-block p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ── Main content area ────────────────────────────── */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 16px 32px;
+}

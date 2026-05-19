@@ -1,0 +1,517 @@
+<!--
+  MIT License
+
+  Copyright (c) 2026 Christian Mollo <gnuchrismo@gmail.com>
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
+  Author: Christian Mollo
+  Email: gnuchrismo@gmail.com
+-->
+<!-- ══════════════════════════════════════════════════════════
+     FACE CAPTURE v4.0 — Banco Fortaleza
+     WCAG 2.1 AA · ISO 29794-5 · Anti-Spoof v4
+     ══════════════════════════════════════════════════════════ -->
+<section class="capture-wrap" aria-label="Verificación biométrica facial"
+         aria-describedby="biometric-instructions">
+
+  <p id="biometric-instructions" class="sr-only">
+    Coloca tu rostro dentro del óvalo. El sistema verificará automáticamente
+    tu identidad mediante parpadeo y movimiento de cabeza. Cuando el óvalo sea
+    dorado y el botón Capturar esté activo, presiona para completar la verificación.
+  </p>
+
+  <!-- ═══ CÁMARA ═══════════════════════════════════════════════ -->
+  <div class="camera-stage" *ngIf="!capturedImage()"
+       role="img"
+       [attr.aria-label]="hint()">
+
+    <video #video class="camera-feed" autoplay playsinline muted
+           aria-hidden="true"
+           [style.filter]="videoFilter()"></video>
+
+    <!-- Aviso de calidad para lectores de pantalla -->
+    <div class="sr-only" aria-live="polite" aria-atomic="true">{{ hint() }}</div>
+
+    <!-- ── SVG Overlay Premium v4 ───────────────────────────── -->
+    <svg class="overlay" viewBox="0 0 400 533"
+         preserveAspectRatio="xMidYMid slice" aria-hidden="true"
+         focusable="false">
+      <defs>
+        <mask id="oval-mask">
+          <rect width="400" height="533" fill="white"/>
+          <ellipse cx="200" cy="228" rx="152" ry="196" fill="black"/>
+        </mask>
+        <clipPath id="oval-clip">
+          <ellipse cx="200" cy="228" rx="150" ry="194"/>
+        </clipPath>
+        <filter id="glow-o" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="8" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-n" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-r" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="flt-arrow" x="-25%" y="-25%" width="150%" height="150%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.30"/>
+        </filter>
+        <radialGradient id="ready-halo" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#F5A623" stop-opacity="0.14"/>
+          <stop offset="100%" stop-color="#F5A623" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- 1 · Vignette exterior al óvalo -->
+      <rect width="400" height="533" fill="rgba(8,18,38,0.78)"
+            mask="url(#oval-mask)"/>
+
+      <!-- 2 · Silueta de posicionamiento -->
+      <g class="body-guide"
+         [style.opacity]="showGuide() ? '1' : '0'"
+         style="transition:opacity 0.65s ease">
+        <ellipse cx="200" cy="218" rx="140" ry="180" fill="url(#ready-halo)"/>
+        <path d="M 200 62
+                 C 155 62, 112 97, 108 150
+                 C 104 197, 124 244, 148 274
+                 C 158 290, 163 307, 162 322
+                 C 160 337, 155 347, 150 354
+                 C 132 366, 90 380, 58 410
+                 L 342 410
+                 C 310 380, 268 366, 250 354
+                 C 245 347, 240 337, 238 322
+                 C 237 307, 242 290, 252 274
+                 C 276 244, 296 197, 292 150
+                 C 288 97, 245 62, 200 62 Z"
+              fill="rgba(255,255,255,0.04)"
+              stroke="rgba(255,255,255,0.28)"
+              stroke-width="1.5"
+              stroke-dasharray="7 4"
+              stroke-linejoin="round"/>
+        <line x1="148" y1="186" x2="190" y2="186"
+              stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="210" y1="186" x2="252" y2="186"
+              stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M 178 268 Q 200 276 222 268"
+              fill="none" stroke="rgba(255,255,255,0.14)"
+              stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="152" y1="354" x2="248" y2="354"
+              stroke="rgba(255,255,255,0.12)" stroke-width="1"
+              stroke-dasharray="3 4" stroke-linecap="round"/>
+        <text x="200" y="148" text-anchor="middle"
+              font-family="'Inter','Outfit',sans-serif"
+              font-size="13" font-weight="600"
+              fill="rgba(255,255,255,0.45)">Centra tu rostro aquí</text>
+      </g>
+
+      <!-- 3 · Línea de scan (analizando) -->
+      <line *ngIf="faceDetected() && !canCapture()"
+            class="scan-line"
+            x1="52" y1="228" x2="348" y2="228"
+            stroke="rgba(245,166,35,0.50)" stroke-width="2"
+            clip-path="url(#oval-clip)"/>
+
+      <!-- 4 · Tracking facial -->
+      <rect *ngIf="faceDetected()" class="face-track-border"
+            [attr.x]="200 - (visionService.rawFaceW() * 200)"
+            [attr.y]="228 - (visionService.rawFaceH() * 300)"
+            [attr.width]="visionService.rawFaceW() * 400"
+            [attr.height]="visionService.rawFaceH() * 600"
+            rx="40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+
+      <!-- 5 · Pulso verde listo -->
+      <ellipse *ngIf="canCapture()" class="ready-pulse"
+               cx="200" cy="228" rx="150" ry="194"
+               fill="rgba(245,166,35,0.12)"/>
+
+      <!-- 6 · Óvalo principal -->
+      <ellipse cx="200" cy="228" rx="150" ry="194"
+               fill="none" stroke-width="3" class="oval-ring"
+               [attr.stroke]="ovalColor()"
+               [attr.stroke-dasharray]="ovalDash()"
+               [attr.filter]="canCapture() ? 'url(#glow-o)'
+                            : rawFaceCount() > 1 ? 'url(#glow-r)'
+                            : faceDetected() ? 'url(#glow-n)' : 'none'"/>
+
+      <!-- 7 · Flechas direccionales (Yaw + Pitch) -->
+      <g *ngIf="needsUp()" class="dir-arrow" filter="url(#flt-arrow)">
+        <circle cx="200" cy="46" r="22" fill="rgba(245,166,35,0.94)"/>
+        <polyline points="191,53 200,39 209,53"
+                  fill="none" stroke="white" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="200" y="82" text-anchor="middle"
+              font-family="'Inter',sans-serif" font-size="11" font-weight="700"
+              fill="#F5A623">Sube la cabeza</text>
+      </g>
+
+      <g *ngIf="needsDown()" class="dir-arrow" filter="url(#flt-arrow)">
+        <circle cx="200" cy="487" r="22" fill="rgba(245,166,35,0.94)"/>
+        <polyline points="191,480 200,494 209,480"
+                  fill="none" stroke="white" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="200" y="468" text-anchor="middle"
+              font-family="'Inter',sans-serif" font-size="11" font-weight="700"
+              fill="#F5A623">Baja la cabeza</text>
+      </g>
+
+      <g *ngIf="needsLeft()" class="dir-arrow" filter="url(#flt-arrow)">
+        <circle cx="36" cy="228" r="22" fill="rgba(245,166,35,0.94)"/>
+        <polyline points="43,219 29,228 43,237"
+                  fill="none" stroke="white" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="36" y="264" text-anchor="middle"
+              font-family="'Inter',sans-serif" font-size="10" font-weight="700"
+              fill="#F5A623">Muévete</text>
+      </g>
+
+      <g *ngIf="needsRight()" class="dir-arrow" filter="url(#flt-arrow)">
+        <circle cx="364" cy="228" r="22" fill="rgba(245,166,35,0.94)"/>
+        <polyline points="357,219 371,228 357,237"
+                  fill="none" stroke="white" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="364" y="264" text-anchor="middle"
+              font-family="'Inter',sans-serif" font-size="10" font-weight="700"
+              fill="#F5A623">Muévete</text>
+      </g>
+
+      <!-- ↩️ ROLL — v4.0: indicador de inclinación lateral -->
+      <g *ngIf="needsTiltCorrect()" class="dir-arrow" filter="url(#flt-arrow)">
+        <rect x="90" y="12" width="220" height="26" rx="13"
+              fill="rgba(245,166,35,0.90)"/>
+        <text x="200" y="30" text-anchor="middle"
+              font-family="'Inter',sans-serif" font-size="11" font-weight="700"
+              fill="white">↩️ Endereza la cabeza</text>
+      </g>
+
+      <!-- ⊙ ACÉRCATE -->
+      <g *ngIf="needsCloser()">
+        <rect x="95" y="463" width="210" height="26" rx="13"
+              fill="rgba(245,166,35,0.88)"/>
+        <text x="200" y="481" text-anchor="middle"
+              font-family="'Inter',sans-serif" font-size="12" font-weight="700"
+              fill="white">↔ Acércate a la cámara</text>
+      </g>
+
+      <!-- ⚠ Múltiples rostros -->
+      <g *ngIf="rawFaceCount() > 1">
+        <rect x="55" y="440" width="290" height="30" rx="10"
+              fill="rgba(239,68,68,0.90)"/>
+        <text x="200" y="460" text-anchor="middle"
+              font-family="'Inter',sans-serif" font-size="12" font-weight="700"
+              fill="white">⚠ Solo debe aparecer un rostro</text>
+      </g>
+
+      <!-- 8 · Marcas angulares -->
+      <g stroke="rgba(245,166,35,0.65)" stroke-width="2.5" stroke-linecap="round">
+        <line x1="51"  y1="90"  x2="74"  y2="90"/><line x1="51"  y1="90"  x2="51"  y2="113"/>
+        <line x1="349" y1="90"  x2="326" y2="90"/><line x1="349" y1="90"  x2="349" y2="113"/>
+        <line x1="51"  y1="447" x2="74"  y2="447"/><line x1="51"  y1="447" x2="51"  y2="424"/>
+        <line x1="349" y1="447" x2="326" y2="447"/><line x1="349" y1="447" x2="349" y2="424"/>
+      </g>
+
+      <!-- 9 · Check de confirmación -->
+      <g *ngIf="canCapture()" class="ready-check">
+        <circle cx="200" cy="453" r="21" fill="rgba(245,166,35,0.96)"
+                filter="url(#glow-o)"/>
+        <polyline points="191,453 198,461 212,444"
+                  fill="none" stroke="white" stroke-width="3.2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </svg><!-- /svg -->
+
+    <!-- Toast de guía contextual — WCAG: role dinámico según severidad -->
+    <div class="hint-toast"
+         [attr.role]="hintRole()"
+         aria-atomic="true"
+         [class.hint-ok]="canCapture()"
+         [class.hint-error]="rawFaceCount() > 1">{{ hint() }}</div>
+
+    <!-- Barra de carga inicial -->
+    <div class="init-progress-bar" *ngIf="!workerReady() && initStep() !== 'FAILED' && initStep() !== 'TIMEOUT'"
+         role="status" aria-live="polite" [attr.aria-label]="initPhaseLabel()">
+      <div class="init-steps">
+        <div class="init-step"
+             [class.active]="initStep()==='LOADING_WASM' || initStep()==='LOADING_MODELS'"
+             [class.done]="initStep()==='READY'">📦 Modelos</div>
+        <div class="init-step-dot"></div>
+        <div class="init-step" [class.done]="initStep()==='READY'">✅ Listo</div>
+      </div>
+    </div>
+
+    <div class="init-error-badge"
+         role="alert"
+         *ngIf="initStep()==='FAILED' || initStep()==='TIMEOUT'">
+      ❌ {{ workerError() ?? 'Recarga la página.' }}
+    </div>
+
+    <!-- Badge de filtro activo -->
+    <div class="filter-badge" *ngIf="isFilterModified()" aria-live="polite">
+      🔆 {{ brightness() }}x · C {{ contrast() }}x
+    </div>
+
+    <!-- Controles flotantes -->
+    <div class="cam-controls-bar" role="toolbar" aria-label="Controles de cámara">
+      <button class="cam-ctrl-btn" id="btn-light-panel"
+              (click)="toggleLightPanel()"
+              [class.cam-ctrl-active]="lightPanelOpen()"
+              [attr.aria-expanded]="lightPanelOpen()"
+              aria-controls="light-panel-region"
+              aria-label="Ajustar iluminación">💡</button>
+      <button class="cam-ctrl-btn" id="btn-calibration-toggle"
+              (click)="toggleCalibration()"
+              [class.cam-ctrl-active]="calibrationOpen()"
+              [attr.aria-expanded]="calibrationOpen()"
+              aria-label="Calibración de umbrales">⚙️</button>
+      <button class="cam-ctrl-btn" id="btn-debug-toggle"
+              (click)="toggleDebug()"
+              [class.cam-ctrl-active]="debugOpen()"
+              [attr.aria-expanded]="debugOpen()"
+              aria-label="Panel de diagnóstico técnico">🔬</button>
+    </div>
+  </div><!-- /camera-stage -->
+
+  <!-- ═══ PANEL DE CALIBRACIÓN (v4.1) ════════════════════════════ -->
+  <app-threshold-calibration
+    *ngIf="calibrationOpen() && !capturedImage()"
+    (close)="closeCalibration()">
+  </app-threshold-calibration>
+
+  <!-- ═══ PANEL DE ILUMINACIÓN ══════════════════════════════════ -->
+  <div class="light-panel" id="light-panel-region"
+       *ngIf="lightPanelOpen() && !capturedImage()"
+       role="region" aria-label="Controles de iluminación">
+    <div class="light-panel-header">
+      <span class="light-title">💡 Controles de iluminación</span>
+      <button class="light-reset" id="btn-reset-filter"
+              (click)="resetFilter()" [disabled]="!isFilterModified()"
+              aria-label="Restablecer filtros de iluminación">↺ Restablecer</button>
+    </div>
+    <div class="light-slider-group">
+      <div class="light-slider-label">
+        <span class="lsl-icon" aria-hidden="true">🌑</span>
+        <label class="lsl-name" for="slider-brightness">Brillo</label>
+        <span class="lsl-val" [class.lsl-modified]="brightness()!==1.0">{{ brightness() }}x</span>
+        <span class="lsl-icon" aria-hidden="true">☀️</span>
+      </div>
+      <input type="range" class="light-slider" id="slider-brightness"
+             min="0.5" max="2.0" step="0.1" [value]="brightness()"
+             [attr.aria-valuenow]="brightness()"
+             aria-valuemin="0.5" aria-valuemax="2.0"
+             aria-label="Ajustar brillo de la cámara"
+             (input)="onBrightnessChange($any($event.target).value)"/>
+      <div class="slider-marks" aria-hidden="true"><span>0.5x</span><span>1.0x</span><span>1.5x</span><span>2.0x</span></div>
+    </div>
+    <div class="light-slider-group">
+      <div class="light-slider-label">
+        <span class="lsl-icon" aria-hidden="true">◑</span>
+        <label class="lsl-name" for="slider-contrast">Contraste</label>
+        <span class="lsl-val" [class.lsl-modified]="contrast()!==1.0">{{ contrast() }}x</span>
+        <span class="lsl-icon" aria-hidden="true">⬛</span>
+      </div>
+      <input type="range" class="light-slider" id="slider-contrast"
+             min="0.5" max="2.0" step="0.1" [value]="contrast()"
+             [attr.aria-valuenow]="contrast()"
+             aria-valuemin="0.5" aria-valuemax="2.0"
+             aria-label="Ajustar contraste de la cámara"
+             (input)="onContrastChange($any($event.target).value)"/>
+      <div class="slider-marks" aria-hidden="true"><span>0.5x</span><span>1.0x</span><span>1.5x</span><span>2.0x</span></div>
+    </div>
+    <div class="light-toggle-row">
+      <div class="light-toggle-info">
+        <span class="light-toggle-title">🤖 Auto-mejora de brillo</span>
+        <span class="light-toggle-desc">Incrementa automáticamente cuando detecta poca luz</span>
+      </div>
+      <button class="toggle-btn" id="btn-auto-enhance"
+              [class.toggle-on]="autoEnhance()"
+              [attr.aria-pressed]="autoEnhance()"
+              aria-label="Activar auto-mejora de brillo"
+              (click)="toggleAutoEnhance()">
+        <span class="toggle-knob" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div class="preset-row">
+      <span class="preset-label" id="preset-label">Presets:</span>
+      <button class="preset-btn" aria-describedby="preset-label"
+              (click)="onBrightnessChange('1.0');onContrastChange('1.0')">Normal</button>
+      <button class="preset-btn" aria-describedby="preset-label"
+              (click)="onBrightnessChange('1.4');onContrastChange('1.1')">🌥️ Poca luz</button>
+      <button class="preset-btn" aria-describedby="preset-label"
+              (click)="onBrightnessChange('0.8');onContrastChange('1.3')">☀️ Mucha luz</button>
+      <button class="preset-btn" aria-describedby="preset-label"
+              (click)="onBrightnessChange('1.7');onContrastChange('1.2')">🌙 Nocturno</button>
+    </div>
+  </div>
+
+
+  <!-- ═══ VALIDACIONES ══════════════════════════════════════════ -->
+  <aside class="feedback-panel" *ngIf="!capturedImage()"
+         aria-label="Estado de validaciones biométricas">
+    <div class="error-bar" role="alert" *ngIf="cameraError()">
+      <span aria-hidden="true">⚠</span> {{ cameraError() }}
+    </div>
+    <p class="section-label" *ngIf="!cameraError()">Estado de validaciones</p>
+    <ul class="indicators" *ngIf="!cameraError()" role="list">
+      <li class="ind" [class.ind-ok]="faceDetected()" [class.ind-pending]="!faceDetected()"
+          [attr.aria-label]="'Rostro detectado: ' + (faceDetected() ? 'sí' : 'no')">
+        <span class="ind-icon-wrap" aria-hidden="true">{{ faceDetected() ? '✓' : '👤' }}</span>Rostro detectado
+      </li>
+      <li class="ind" [class.ind-ok]="singleFace()&&faceDetected()"
+          [class.ind-danger]="rawFaceCount()>1" [class.ind-pending]="!faceDetected()"
+          [attr.aria-label]="rawFaceCount()>1 ? 'Advertencia: se detectaron '+rawFaceCount()+' rostros' : 'Un solo rostro: ' + (singleFace() ? 'sí' : 'no')">
+        <span class="ind-icon-wrap" aria-hidden="true">{{ rawFaceCount()>1 ? '⚠️' : (singleFace()&&faceDetected() ? '✓' : '👥') }}</span>
+        <span>Un solo rostro<span class="ind-sub" *ngIf="rawFaceCount()>1"> ({{ rawFaceCount() }})</span></span>
+      </li>
+      <li class="ind" [class.ind-ok]="isFramed()"
+          [class.ind-warn]="faceDetected()&&!isFramed()" [class.ind-pending]="!faceDetected()"
+          [attr.aria-label]="'Encuadre correcto: ' + (isFramed() ? 'sí' : 'ajustar posición')">
+        <span class="ind-icon-wrap" aria-hidden="true">{{ isFramed() ? '✓' : '⬜' }}</span>Encuadre correcto
+      </li>
+      <li class="ind" [class.ind-ok]="isLit()"
+          [class.ind-warn]="faceDetected()&&!isLit()" [class.ind-pending]="!faceDetected()"
+          [attr.aria-label]="'Buena iluminación: ' + (isLit() ? 'sí' : 'mejorar luz')">
+        <span class="ind-icon-wrap" aria-hidden="true">{{ isLit() ? '✓' : '💡' }}</span>Buena iluminación
+      </li>
+      <li class="ind" [class.ind-ok]="notBlurry()"
+          [class.ind-warn]="faceDetected()&&!notBlurry()" [class.ind-pending]="!faceDetected()"
+          [attr.aria-label]="'Imagen nítida: ' + (notBlurry() ? 'sí' : 'mantener quieto el dispositivo')">
+        <span class="ind-icon-wrap" aria-hidden="true">{{ notBlurry() ? '✓' : '🔍' }}</span>Imagen nítida
+      </li>
+      <!-- v4.0: Roll indicator -->
+      <li class="ind" [class.ind-ok]="rollOk()"
+          [class.ind-warn]="faceDetected()&&!rollOk()" [class.ind-pending]="!faceDetected()"
+          [attr.aria-label]="'Posición recta: ' + (rollOk() ? 'sí' : 'enderezar cabeza')">
+        <span class="ind-icon-wrap" aria-hidden="true">{{ rollOk() ? '✓' : '↩️' }}</span>Posición recta
+      </li>
+      <li class="ind" [class.ind-ok]="antiSpoofOk()"
+          [class.ind-danger]="faceDetected()&&isFramed()&&!antiSpoofOk()" [class.ind-pending]="!faceDetected()"
+          [attr.aria-label]="'Persona real: ' + (antiSpoofOk() ? 'verificada' : 'mostrar rostro en persona')">
+        <span class="ind-icon-wrap" aria-hidden="true">{{ antiSpoofOk() ? '✓' : '🛡️' }}</span>Persona real
+      </li>
+      <li class="ind" [class.ind-ok]="!hasGlasses()&&faceDetected()"
+          [class.ind-danger]="hasGlasses()" [class.ind-pending]="!faceDetected()"
+          [attr.aria-label]="hasGlasses() ? 'Por favor quítate los lentes' : 'Sin lentes: correcto'">
+        <span class="ind-icon-wrap" aria-hidden="true">{{ hasGlasses() ? '👓' : (faceDetected() ? '✓' : '🕶️') }}</span>
+        {{ hasGlasses() ? 'Quítate los lentes' : 'Sin lentes' }}
+      </li>
+      <li class="ind" style="grid-column:1/-1"
+          [class.ind-ok]="livenessOk()"
+          [class.ind-progress]="faceDetected()&&!livenessOk()&&livenessProgress()>0"
+          [class.ind-pending]="!faceDetected()||livenessProgress()===0"
+          [attr.aria-label]="'Prueba de vida: ' + livenessProgress() + '% completado'">
+        <span class="ind-icon-wrap" aria-hidden="true">
+          <span *ngIf="livenessOk()">✓</span>
+          <span *ngIf="!livenessOk()&&livenessProgress()>0" class="live-dot"></span>
+          <span *ngIf="!livenessOk()&&livenessProgress()===0">👁️</span>
+        </span>
+        <span>Prueba de vida<span class="ind-sub" *ngIf="!livenessOk()&&livenessProgress()>0"> — {{ livenessProgress() }}%</span></span>
+      </li>
+    </ul>
+
+    <ng-container *ngIf="!cameraError() && !livenessOk()">
+      <div class="liveness-row">
+        <span class="liveness-label">Parpadea · mueve la cabeza levemente</span>
+        <span class="liveness-pct" aria-live="polite">{{ livenessProgress() }}%</span>
+      </div>
+      <div class="progress-track"
+           role="progressbar"
+           [attr.aria-valuenow]="livenessProgress()"
+           aria-valuemin="0" aria-valuemax="100"
+           [attr.aria-label]="'Progreso de prueba de vida: ' + livenessProgress() + '%'">
+        <div class="progress-fill" [style.width.%]="livenessProgress()"
+             [class.fill-done]="livenessProgress()>=100"></div>
+      </div>
+    </ng-container>
+
+    <div class="cta-row">
+      <button id="btn-biometric-capture" class="btn-primary"
+              [class.btn-ready]="canCapture()"
+              [disabled]="!canCapture()||isCapturing()"
+              [attr.aria-busy]="isCapturing()"
+              aria-label="Capturar fotografía biométrica"
+              (click)="onCapture()">
+        <span class="spinner" *ngIf="isCapturing()" aria-hidden="true"></span>
+        <span class="sr-only" *ngIf="isCapturing()">Capturando…</span>
+        <span *ngIf="!isCapturing()">📸 Capturar Fotografía</span>
+      </button>
+    </div>
+    <p class="info-note" role="note">🔒 Imagen procesada localmente · No se almacena automáticamente</p>
+  </aside>
+
+
+  <!-- ═══ PREVIEW POST-CAPTURA ══════════════════════════════════ -->
+  <!-- v4.0: bloque retake-row único y limpio (se eliminó el duplicado) -->
+  <div class="retake-row" *ngIf="capturedImage()" role="group" aria-label="Acciones post-captura">
+    <button class="btn-retake" id="btn-retake"
+            (click)="onRetake()"
+            aria-label="Retomar la captura desde el inicio">↩ Retomar</button>
+    <button class="btn-confirm" id="btn-confirm-capture"
+            [disabled]="isConfirming()"
+            [attr.aria-busy]="isConfirming()"
+            (click)="onConfirm()"
+            aria-label="Confirmar y enviar verificación biométrica">
+      <span class="spinner" *ngIf="isConfirming()" aria-hidden="true"></span>
+      <span class="sr-only" *ngIf="isConfirming()">Enviando…</span>
+      <span *ngIf="!isConfirming()" aria-live="polite">
+        {{ submitResult() ? '✅ Enviado' : 'Confirmar y continuar' }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Error de confirmación HTTP -->
+  <div class="confirm-error-bar" *ngIf="confirmError()" role="alert" aria-live="assertive">
+    <span aria-hidden="true">⚠️</span> {{ confirmError() }}
+    <button class="confirm-retry-btn" (click)="onConfirm()" aria-label="Reintentar envío">Reintentar</button>
+  </div>
+
+
+  <!-- ═══ INFORME DE SESIÓN (solo evaluación/debug) ════════════ -->
+  <app-session-report
+    *ngIf="debugMode && capturedImage() && sessionReport()"
+    [report]="sessionReport()"
+    (export)="exportSession()">
+  </app-session-report>
+
+  <canvas #canvas class="hidden-canvas" aria-hidden="true"></canvas>
+</section>
+
+
+<!-- ═══ PANEL DE DIAGNÓSTICO ════════════════════════════════════ -->
+<app-debug-panel
+  *ngIf="debugOpen()"
+  [initStep]="initPhaseLabel()"
+  [initDuration]="initDuration()"
+  [fps]="workerFps()"
+  [faceCount]="rawFaceCount()"
+  [ear]="rawEar()"
+  [blur]="rawBlur()"
+  [yaw]="rawYaw()"
+  [pitch]="rawPitch()"
+  [roll]="rawRoll()"
+  [antiSpoof]="rawAntiSpoof()"
+  [microMotion]="rawMicroMotion()"
+  [qualityScore]="rawQualityScore()"
+  [interOcular]="rawInterOcular()"
+  [liveness]="livenessProgress()"
+  [logs]="debugLogs()"
+  (close)="toggleDebug()">
+</app-debug-panel>
