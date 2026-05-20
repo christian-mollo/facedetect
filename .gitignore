@@ -49,3 +49,6 @@ Thumbs.db
 /*.docx
 !Documentos/
 !DevOB/
+
+# Local docs folder
+/docs
